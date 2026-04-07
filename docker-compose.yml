@@ -1,0 +1,66 @@
+services:
+  # --- Backend: Laravel ---
+  backend:
+    build: ./backend
+    container_name: flight-backend
+    volumes:
+      - ./backend:/var/www/html
+    environment:
+      - OTEL_PHP_AUTOLOAD_ENABLED=true
+      - OTEL_SERVICE_NAME=flight-backend-api
+      - OTEL_TRACES_EXPORTER=otlp
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - DB_HOST=mysql
+      - DB_DATABASE=flight_db
+      - DB_USERNAME=user
+      - DB_PASSWORD=password
+    depends_on:
+      - mysql
+      - otel-collector
+    ports:
+      - "8000:8000"
+    command: php -S 0.0.0.0:8000 -t public
+
+  # --- Database: MySQL ---
+  mysql:
+    image: mariadb:10.11
+    container_name: flight-db
+    environment:
+      - MYSQL_DATABASE=flight_db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "3306:3306"
+
+  # --- OpenTelemetry Collector ---
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: otel-collector
+    volumes:
+      - ./otel-config.yaml:/etc/otel-config.yaml
+    command: ["--config=/etc/otel-config.yaml"]
+    ports:
+      - "4318:4318" # OTLP HTTP receiver
+
+  # --- Jaeger (可視化ツール) ---
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: jaeger
+    ports:
+      - "16686:16686" # UI用
+
+  # --- Frontend: Node.js (開発用) ---
+  frontend:
+    build: ./frontend
+    container_name: flight-frontend
+    ports:
+      - "5173:5173" # Viteの開発サーバー用
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # コンテナ内のnode_modulesをホストで上書きしないためのハック
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Windows/WSL2などでホットリロードが効かない場合の対策
+    depends_on:
+      - backend
