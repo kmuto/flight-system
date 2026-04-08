@@ -10,7 +10,7 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 
 const resource = resourceFromAttributes({
-  [ATTR_SERVICE_NAME]: "my-app",
+  [ATTR_SERVICE_NAME]: "flight-frontend",
 });
 
 const provider = new WebTracerProvider({
