@@ -12,6 +12,10 @@ exporters:
     endpoint: "jaeger:4317"
     tls:
       insecure: true
+  otlp_http/mackerel:
+    endpoint: https://otlp-vaxila.mackerelio.com
+    headers:
+      "Mackerel-Api-Key": "${MACKEREL_APIKEY}"
   debug:
     verbosity: detailed
 
@@ -20,4 +24,4 @@ service:
     traces:
       receivers: [otlp]
       processors: []
-      exporters: [otlp/jaeger, debug]
+      exporters: [otlp_http/mackerel, otlp/jaeger, debug]

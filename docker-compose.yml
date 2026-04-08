@@ -2,6 +2,9 @@ services:
   # --- Backend: Laravel ---
   backend:
     build: ./backend
+    # For Rancher's bug, allow time sync
+    # docker compose exec -u 0 backend date -s "@$(date +%s.%N)"
+    privileged: true
     container_name: flight-backend
     volumes:
       - ./backend:/var/www/html
@@ -43,6 +46,8 @@ services:
     command: ["--config=/etc/otel-config.yaml"]
     ports:
       - "4318:4318" # OTLP HTTP receiver
+    environment:
+      - MACKEREL_APIKEY
 
   # --- Jaeger (可視化ツール) ---
   jaeger:
