@@ -12,20 +12,30 @@ class FlightController extends Controller
     {
         // 1. スパンに属性を追加（Jaegerで検索しやすくなります）
         $span = Span::getCurrent();
-        $span->setAttribute('app.search.origin', $request->query('origin', 'any'));
+        $origin = $request->query('origin', 'any');
+        $destination = $request->query('destination', ''); // 目的地を取得
 
-        // 2. データベースから取得（SQLスパンが生成される）
-        $flights = Flight::limit(1000)->get();
+        $span->setAttribute('app.search.origin', $origin);
+        $span->setAttribute('app.search.destination', $destination);
 
-        // 3. 重い処理のシミュレーション
-        // transformの中で少し待機を入れることで、トレースの「幅」を作ります
-        $flights->transform(function ($flight) {
-            // 0.5ミリ秒（500マイクロ秒）待機
+        // --- 【出発地と目的地が同じならエラー】 ---
+        if (!empty($origin) && !empty($destination) && $origin === $destination) {
+            abort(500, 'Internal Error');
+        }
+
+        // 1. データベースから検索（ページネーション）
+        $flights = Flight::where('origin', 'like', "%$origin%")
+                         ->where('destination', 'like', "%$destination%")
+                         ->paginate(15);
+
+        // 2. コレクションに対して「重い処理」と「フォーマット」を適用
+        $flights->getCollection()->transform(function ($flight) {
+            // 0.5ミリ秒わざと待機（トレースに隙間を作る）
             usleep(500); 
-            
-            // 正しいPHPの文法で文字列を作成
+        
+            // 抜けていたフォーマット処理を復活
             $flight->display_price = "JPY " . number_format($flight->price);
-            
+        
             return $flight;
         });
 
