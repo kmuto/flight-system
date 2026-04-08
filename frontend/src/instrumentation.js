@@ -8,6 +8,7 @@ import { ZoneContextManager } from "@opentelemetry/context-zone";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
+import { UserInteractionInstrumentation } from '@opentelemetry/instrumentation-user-interaction';
 
 const resource = resourceFromAttributes({
   [ATTR_SERVICE_NAME]: "flight-frontend",
@@ -52,6 +53,9 @@ registerInstrumentations({
         // /^\/api/                // /api/flights... のような相対パスの場合
         /.*/
       ],
+    }),
+    new UserInteractionInstrumentation({
+      eventNames: ['click', 'submit'], // どのイベントを拾うか
     }),
   ],
 });
