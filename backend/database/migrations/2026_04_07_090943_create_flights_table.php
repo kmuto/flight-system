@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('flights', function (Blueprint $table) {
             $table->id();
-            $table->string('flight_number');
-            $table->string('origin');
-            $table->string('destination');
-            $table->integer('price');
+            $table->string('flight_number');    // 便名 (JL123など)
+            $table->string('airline');          // 航空会社
+            $table->string('origin');           // 出発地
+            $table->string('destination');      // 目的地
+            $table->dateTime('departure_at');   // 出発時刻
+            $table->integer('price');           // 価格
             $table->timestamps();
         });
     }
