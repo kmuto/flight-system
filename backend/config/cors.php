@@ -24,7 +24,7 @@ return [
 
     'allowed_origins_patterns' => [],
 
-    // traceparent を許可することで、フロントエンドとバックエンドのトレースが繋がります
+    // traceparent を許可
     'allowed_headers' => ['*', 'traceparent'],
 
     'exposed_headers' => [],

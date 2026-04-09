@@ -16,7 +16,7 @@ function App() {
       if (origin === '') {
         const errorMsg = "出発地を指定してください";
       
-        // Jaeger にエラーの証拠を残す
+        // エラーの証拠を残す
         span.recordException(new Error(errorMsg));
         span.setStatus({ code: SpanStatusCode.ERROR, message: errorMsg });
         span.setAttribute('app.validation.fail_reason', 'identical_locations');
@@ -32,7 +32,7 @@ function App() {
 
     try {
       // フロントエンドの初期化コード(instrumentation.js)により、
-      // この fetch には自動的に traceparent ヘッダーが付与されます。
+      // この fetch には自動的に traceparent ヘッダーが付与される
      const res = await fetch(`/api/flights/search?origin=${origin}&destination=${destination}`);
       const data = await res.json();
 

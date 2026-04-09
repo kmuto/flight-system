@@ -19,14 +19,14 @@ const provider = new WebTracerProvider({
   spanProcessors: [
     new BatchSpanProcessor(
       new OTLPTraceExporter({
-        url: "http://localhost:4318/v1/traces", // URLはオプションで省略可能 - デフォルトは http://localhost:4318/v1/traces
+        // url: "http://localhost:4318/v1/traces", // URLは省略可能 - デフォルトは http://localhost:4318/v1/traces
         headers: {}, // 各リクエストで送信するカスタムヘッダーを含むオプションのオブジェクト
         concurrencyLimit: 10, // 保留中のリクエストに対するオプションの制限
       }),
       {
-        // 最大キューサイズ。サイズに達した後、スパンは破棄されます。
+        // 最大キューサイズ。サイズに達した後、スパンは破棄される
         maxQueueSize: 100,
-        // 各エクスポートの最大バッチサイズ。maxQueueSize以下である必要があります。
+        // 各エクスポートの最大バッチサイズ。maxQueueSize以下である必要がある
         maxExportBatchSize: 10,
         // 2つの連続したエクスポート間の間隔
         scheduledDelayMillis: 500,
@@ -47,9 +47,8 @@ provider.register({
 registerInstrumentations({
   instrumentations: [
     new FetchInstrumentation({
-      // ここを追加！
       propagateTraceHeaderCorsUrls: [
-        // 'http://localhost:8000', // LaravelのURL（絶対パスの場合）
+        // 'http://localhost:8010', // LaravelのURL（絶対パスの場合）
         // /^\/api/                // /api/flights... のような相対パスの場合
         /.*/
       ],

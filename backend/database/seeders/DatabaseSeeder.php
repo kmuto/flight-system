@@ -15,12 +15,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        /* User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]); */
         // \App\Models\Flight::create(['flight_number' => 'JL123', 'origin' => 'HND', 'destination' => 'ITM', 'price' => 12000]);
         \App\Models\Flight::factory(1000)->create();
     }

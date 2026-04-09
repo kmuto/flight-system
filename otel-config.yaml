@@ -24,4 +24,4 @@ service:
     traces:
       receivers: [otlp]
       processors: []
-      exporters: [otlp_http/mackerel, otlp/jaeger, debug]
+      exporters: [otlp_http/mackerel, otlp/jaeger]

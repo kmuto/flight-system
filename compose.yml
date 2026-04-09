@@ -1,8 +1,9 @@
 services:
-  # --- Backend: Laravel ---
+  # --- バックエンド: Laravel ---
   backend:
     build: ./backend
-    # For Rancher's bug, allow time sync
+    # Rancher+macOSの場合、ホストとコンテナの時刻が大きくずれることがある
+    # そのため、ここでは時刻を強制的に変更できる権限を与えている。以下で強制調整可能
     # docker compose exec -u 0 backend date -s "@$(date +%s.%N)"
     privileged: true
     container_name: flight-backend
@@ -21,11 +22,9 @@ services:
     depends_on:
       - mysql
       - otel-collector
-    ports:
-      - "8000:8000"
-    command: php -S 0.0.0.0:8000 -t public
+    command: php -S 0.0.0.0:8010 -t public
 
-  # --- Database: MySQL ---
+  # --- データベース: MariaDB (MySQL見立て) ---
   mysql:
     image: mariadb:10.11
     container_name: flight-db
@@ -34,8 +33,6 @@ services:
       - MYSQL_USER=user
       - MYSQL_PASSWORD=password
       - MYSQL_ROOT_PASSWORD=root_password
-    ports:
-      - "3306:3306"
 
   # --- OpenTelemetry Collector ---
   otel-collector:
@@ -56,15 +53,14 @@ services:
     ports:
       - "16686:16686" # UI用
 
-  # --- Frontend: Node.js (開発用) ---
+  # --- フロントエンド: Node.js ---
   frontend:
     build: ./frontend
     container_name: flight-frontend
     ports:
-      - "5173:5173" # Viteの開発サーバー用
+      - "5173:5173"
     volumes:
       - ./frontend:/app
-      - /app/node_modules # コンテナ内のnode_modulesをホストで上書きしないためのハック
     environment:
       - CHOKIDAR_USEPOLLING=true # Windows/WSL2などでホットリロードが効かない場合の対策
     depends_on:

@@ -6,10 +6,9 @@ export default defineConfig({
   server: {
     host: true, // 0.0.0.0 で待ち受ける設定
     port: 5173,
-    // 任意：バックエンドへのプロキシ設定を入れておくと、CORSではまりにくくなります
     proxy: {
       '/api': {
-        target: 'http://backend:8000',
+        target: 'http://backend:8010',
         changeOrigin: true,
       }
     }
