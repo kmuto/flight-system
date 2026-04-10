@@ -11,46 +11,58 @@ function App() {
     const tracer = trace.getTracer('flight-frontend');
     setLoading(true);
 
-    // フロントエンドのバリデーション用のスパンを開始
-    await tracer.startActiveSpan('ui-validation', async (span) => {
-      if (origin === '') {
-        const errorMsg = "出発地を指定してください";
-      
-        // エラーの証拠を残す
-        span.recordException(new Error(errorMsg));
-        span.setStatus({ code: SpanStatusCode.ERROR, message: errorMsg });
-        span.setAttribute('app.validation.fail_reason', 'identical_locations');
-        span.end(); // ここでスパンを終了
+    await tracer.startActiveSpan('ui-search-workflow', async (searchSpan) => {
+      searchSpan.setAttribute('app.search.origin', origin);
+      searchSpan.setAttribute('app.search.destination', destination);
 
-        setLoading(false);
-        return; // 通信（fetch）せずに終了
-      }
+      // フロントエンドのバリデーション用のスパンを開始
+      await tracer.startActiveSpan('ui-validation', async (span) => {
+        if (origin === '') {
+          const errorMsg = "出発地を指定してください";
 
-      // --- 正常な場合のみ fetch を実行 ---
-      span.addEvent('Validation passed, starting fetch');
-      span.end(); // バリデーションスパンはここで終わり、この後に fetch スパンが続く
+          // エラーの証拠を残す
+          span.recordException(new Error(errorMsg));
+          span.setStatus({ code: SpanStatusCode.ERROR, message: errorMsg });
+          span.setAttribute('app.validation.fail_reason', 'identical_locations');
+          span.end(); // ここでスパンを終了
 
-    try {
-      // フロントエンドの初期化コード(instrumentation.js)により、
-      // この fetch には自動的に traceparent ヘッダーが付与される
-     const res = await fetch(`/api/flights/search?origin=${origin}&destination=${destination}`);
-      const data = await res.json();
+          searchSpan.setStatus({ code: SpanStatusCode.ERROR, message: errorMsg });
+          searchSpan.end();
+          setLoading(false);
+          return; // 通信（fetch）せずに終了
+        }
 
-      if (res.ok) {
-        // paginate() を使っている場合は .data が配列
-        setFlights(data.data); 
-      } else {
-        // エラー時
-        alert("Error: " + data.message);
-        setFlights([]);
-      }
-    } catch (error) {
-     alert("Something wrong. Try later");
-     console.error('Fetch error:', error);
-    } finally {
-      setLoading(false);
-    }
-});
+        // --- 正常な場合のみ fetch を実行 ---
+        span.addEvent('Validation passed, starting fetch');
+        span.end(); // バリデーションスパンはここで終わり、この後に fetch スパンが続く
+
+        try {
+          // フロントエンドの初期化コード(instrumentation.js)により、
+          // この fetch には自動的に traceparent ヘッダーが付与される
+          const res = await fetch(`/api/flights/search?origin=${origin}&destination=${destination}`);
+          const data = await res.json();
+
+          if (res.ok) {
+            // paginate() を使っている場合は .data が配列
+            setFlights(data.data);
+            searchSpan.setStatus({ code: SpanStatusCode.OK });
+          } else {
+            // エラー時
+            alert("Error: " + data.message);
+            setFlights([]);
+            searchSpan.setStatus({ code: SpanStatusCode.ERROR, message: `http_${res.status}` });
+          }
+        } catch (error) {
+          alert("Something wrong. Try later");
+          console.error('Fetch error:', error);
+          searchSpan.recordException(error);
+          searchSpan.setStatus({ code: SpanStatusCode.ERROR, message: 'network_error' });
+        } finally {
+          searchSpan.end();
+          setLoading(false);
+        }
+      });
+    });
   };
 
   return (

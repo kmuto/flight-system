@@ -19,9 +19,6 @@ services:
       - DB_DATABASE=flight_db
       - DB_USERNAME=user
       - DB_PASSWORD=password
-    depends_on:
-      - mysql
-      - otel-collector
     command: php -S 0.0.0.0:8010 -t public
 
   # --- データベース: MariaDB (MySQL見立て) ---
