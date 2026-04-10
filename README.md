@@ -8,7 +8,7 @@
 ## 起動
 ```
 docker compose build
-docker compose up -d db
+docker compose up -d mysql
 docker compose run --rm frontend npm install
 docker compose run --rm backend ./setup.sh
 MACKEREL_APIKEY=<MackerelのAPIキー> docker compose up
