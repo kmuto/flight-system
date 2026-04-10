@@ -26,7 +26,7 @@ services:
 
   # --- データベース: MariaDB (MySQL見立て) ---
   mysql:
-    image: mariadb:10.11
+    image: mariadb:12.2
     container_name: flight-db
     environment:
       - MYSQL_DATABASE=flight_db
