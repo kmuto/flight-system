@@ -1,8 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
+const DELAY_BASE_MS = 800
+const DELAY_JITTER_MS = 400
+
+function delayProxy() {
+  return {
+    name: 'delay-proxy',
+    configureServer(server) {
+      server.middlewares.use('/api', (_req, _res, next) => {
+        const delay = DELAY_BASE_MS + Math.random() * DELAY_JITTER_MS
+        setTimeout(next, delay)
+      })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), delayProxy()],
   server: {
     host: true, // 0.0.0.0 で待ち受ける設定
     port: 5173,
