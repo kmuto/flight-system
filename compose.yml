@@ -2,9 +2,6 @@ services:
   # --- バックエンド: Laravel ---
   backend:
     build: ./backend
-    # Rancher+macOSの場合、ホストとコンテナの時刻が大きくずれることがある
-    # そのため、ここでは時刻を強制的に変更できる権限を与えている。以下で強制調整可能
-    # docker compose exec -u 0 backend date -s "@$(date +%s.%N)"
     privileged: true
     container_name: flight-backend
     volumes:

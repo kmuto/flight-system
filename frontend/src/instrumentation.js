@@ -21,6 +21,7 @@ const provider = new WebTracerProvider({
       new OTLPTraceExporter({
         // url: "http://localhost:4318/v1/traces", // URLは省略可能 - デフォルトは http://localhost:4318/v1/traces
         headers: {}, // 各リクエストで送信するカスタムヘッダーを含むオプションのオブジェクト
+        // 例: headers: { "X-Mackerel-Client-Token": "xxxxx" },
         concurrencyLimit: 10, // 保留中のリクエストに対するオプションの制限
       }),
       {
