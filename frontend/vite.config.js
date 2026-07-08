@@ -17,7 +17,8 @@ function delayProxy() {
 }
 
 export default defineConfig({
-  plugins: [react(), delayProxy()],
+  // plugins: [react(), delayProxy()],
+  plugins: [react()],
   server: {
     host: true, // 0.0.0.0 で待ち受ける設定
     port: 5173,

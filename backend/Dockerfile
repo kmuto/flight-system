@@ -2,7 +2,7 @@ FROM php:8.5-fpm
 
 # 依存パッケージのインストール
 RUN apt-get update && apt-get install -y \
-    libzip-dev zip unzip git \
+    libzip-dev zip unzip git iproute2 \
     && docker-php-ext-install pdo_mysql zip
 
 # OpenTelemetry PHP拡張のインストール
